@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
-"""[summary]
 
-Returns:
-    [type]: [description]
 """
+This module contains a function that
+initializes variables for a Gaussian Mixture Model
+"""
+
 import numpy as np
 kmeans = __import__('1-kmeans').kmeans
 
 
 def initialize(X, k):
-    """[summary]
-
-    Args:
-        X ([type]): [description]
-        k ([type]): [description]
-
-    Returns:
-        [type]: [description]
     """
+    initializes variables for a Gaussian Mixture Model
 
+    X: numpy.ndarray (n, d) containing the dataset
+        - n no. of data points
+        - d no. of dimensions for each data point
+    k: positive integer - the number of clusters
+
+    return:
+        - pi: numpy.ndarray (k,) containing priors for each cluster
+        initialized to be equal
+        - m: numpy.ndarray (k, d) containing centroid means for each cluster,
+        initialized with K-means
+        - S: numpy.ndarray (k, d, d) covariance matrices for each cluster,
+        initialized as identity matrices
+    """
+    n, d = X.shape
     if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None, None, None
-    if type(k) != int or k <= 0:
+    if not isinstance(k, int) or k <= 0:
         return None, None, None
-    n, d = X.shape
-    pi = np.tile(1/k, (k,))
+    pi = np.full((k,), 1 / k)
     m, _ = kmeans(X, k)
-    S = np.tile(np.identity(d), (k, 1, 1))
+    S = np.full((k, d, d), np.identity(d))
     return pi, m, S

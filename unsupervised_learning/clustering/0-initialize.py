@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
-"""[summary]
 
-Returns:
-    [type]: [description]
+"""
+This module contains the initialization of
+the cluster centroids for k-means
 """
 
 import numpy as np
 
 
 def initialize(X, k):
-    """[summary]
+    """
+    Initializes cluster centroids for K-means
 
-    Args:
-        X ([type]): [description]
-        k ([type]): [description]
-
-    Returns:
-        [type]: [description]
+    X: numpy.ndarray (n, d) containing the dataset that
+    will be used for K-means clustering
+        - n no. of data points
+        - d no. of dimensions for each data point
+    k: positive integer - the no. of clusters
+    return: numpy.ndarray (k, d) containing the initialized
+    centroids for each cluster, or None on failure
     """
     if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None
-    if type(k) != int or k <= 0 or k >= X.shape[0]:
+    if not isinstance(k, int) or k <= 0:
         return None
 
     n, d = X.shape
+    min_val = X.min(axis=0)
+    max_val = X.max(axis=0)
 
-    min_ = np.amin(X, axis=0)
-    max_ = np.amax(X, axis=0)
-
-    return np.random.uniform(min_, max_, (k, d))
+    return np.random.uniform(min_val, max_val, size=(k, d))

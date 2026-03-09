@@ -1,48 +1,43 @@
 #!/usr/bin/env python3
-"""[summary]
 
-Returns:
-    [type]: [description]
 """
+This module contains a function that calculates
+expectation step in the EM algorithm for a GMM
+"""
+
 import numpy as np
 pdf = __import__('5-pdf').pdf
 
 
 def expectation(X, pi, m, S):
-    """[summary]
-
-    Args:
-        X ([type]): [description]
-        pi ([type]): [description]
-        m ([type]): [description]
-        S ([type]): [description]
-
-    Returns:
-        [type]: [description]
     """
-    if type(X) is not np.ndarray or len(X.shape) != 2:
-        return None, None
-    if type(m) is not np.ndarray or len(m.shape) != 2:
-        return None, None
-    if type(S) is not np.ndarray or len(S.shape) != 3:
-        return None, None
-    if type(pi) is not np.ndarray or len(pi.shape) != 1:
-        return None, None
-    if X.shape[1] != S.shape[1] or S.shape[1] != S.shape[2]:
-        return (None, None)
-    if X.shape[1] != m.shape[1] or m.shape[0] != S.shape[0]:
-        return (None, None)
-    if pi.shape[0] != m.shape[0]:
-        return (None, None)
-    if not np.isclose(np.sum(pi), 1):
+    initializes variables for a Gaussian Mixture Model
+
+    X: numpy.ndarray (n, d) containing the dataset
+        - n no. of data points
+        - d no. of dimensions for each data point
+    pi: numpy.ndarray (k,) containing the priors for each cluster
+    m: numpy.ndarray (k, d) containing centroid means for each cluster
+    S: numpy.ndarray (k, d, d) covariance matrices for each cluster
+
+    return:
+        - g: numpy.ndarray (k, n) containing the posterior
+            probabilities for each data point in each cluster
+        -l: log likelihood of the model
+    """
+    if len(X.shape) != 2 or len(S.shape) != 3\
+            or len(pi.shape) != 1 or len(m.shape) != 2\
+            or m.shape[1] != X.shape[1]\
+            or S.shape[2] != S.shape[1]\
+            or S.shape[0] != pi.shape[0]\
+            or S.shape[0] != m.shape[0]\
+            or np.min(pi) < 0:
         return None, None
     n, d = X.shape
-    k = S.shape[0]
-    tmp = np.zeros((k, n))
+    k = pi.shape[0]
+    g = np.zeros((k, n))
     for i in range(k):
-        P = pdf(X, m[i], S[i])
-        prior = pi[i]
-        tmp[i] = prior * P
-    g = tmp / np.sum(tmp, axis=0)
-    likelihood = np.sum(np.log(np.sum(tmp, axis=0)))
-    return g, likelihood
+        g[i] = pi[i] * pdf(X, m[i], S[i])
+    g = g / np.sum(g, axis=0)
+    l = np.sum(np.log(np.sum(g, axis=0)))
+    return g, l

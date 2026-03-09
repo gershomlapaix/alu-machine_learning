@@ -1,68 +1,53 @@
 #!/usr/bin/env python3
-"""[summary]
 
-Returns:
-    [type]: [description]
 """
+This module contains a function that
+perfoms K-means on a dataset
+"""
+
 import numpy as np
 
 
 def kmeans(X, k, iterations=1000):
-    """[summary]
-
-    Args:
-        X ([type]): [description]
-        k ([type]): [description]
-        iterations (int, optional): [description]. Defaults to 1000.
-
-    Returns:
-        [type]: [description]
     """
+    perfoms K-means on a dataset
 
-    if not isinstance(X, np.ndarray) or len(X.shape) != 2:
-        return None, None
+    X: numpy.ndarray (n, d) containing the dataset that
+    will be used for K-means clustering
+        - n no. of data points
+        - d no. of dimensions for each data point
+    k: positive integer - the no. of clusters
+    iterations: +ve(int) - max no. of iterations perfomed
 
-    if type(k) != int or k <= 0:
-        return None, None
-
-    if type(iterations) != int or iterations <= 0:
-        return None, None
+    return:
+        - C: numpy.ndarray (k, d) containing the centroid
+        for each cluster
+        - clss: numpy.ndarray (n,) containing the index of the
+        cluster in C that each data point belongs to
+    """
+    if type(X) is not np.ndarray or type(k) is not int:
+        return (None, None)
+    if len(X.shape) != 2 or k < 0:
+        return (None, None)
+    if type(iterations) is not int or iterations <= 0:
+        return (None, None)
     n, d = X.shape
-    minimum = np.amin(X, axis=0)
-    maximum = np.amax(X, axis=0)
-    C = initialize(X, k)
-    clss = None
+    if k == 0:
+        return (None, None)
+    low = np.amin(X, axis=0)
+    high = np.amax(X, axis=0)
+    C = np.random.uniform(low, high, size=(k, d))
     for i in range(iterations):
-        C_cpy = np.copy(C)
-        distance = np.linalg.norm(X[:, None] - C, axis=-1)
-        clss = np.argmin(distance, axis=-1)
-        # move the centroids
-        for j in range(k):
-            index = np.argwhere(clss == j)
-            if not len(index):
-                C[j] = initialize(X, 1)
+        clss = np.argmin(np.linalg.norm(X[:, None] - C, axis=-1), axis=-1)
+        new_C = np.copy(C)
+        for c in range(k):
+            if c not in clss:
+                new_C[c] = np.random.uniform(low, high)
             else:
-                C[j] = np.mean(X[index], axis=0)
-        if (C_cpy == C).all():
-            return C, clss
-    distance = np.linalg.norm(X[:, None] - C, axis=-1)
-    clss = np.argmin(distance, axis=-1)
-
-    return C, clss
-
-
-def initialize(X, k):
-    """[summary]
-
-    Args:
-        X ([type]): [description]
-        k ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
-    n, d = X.shape
-    minimum = np.amin(X, axis=0)
-    maximum = np.amax(X, axis=0)
-    values = np.random.uniform(minimum, maximum, (k, d))
-    return values
+                new_C[c] = np.mean(X[clss == c], axis=0)
+        if (new_C == C).all():
+            return (C, clss)
+        else:
+            C = new_C
+    clss = np.argmin(np.linalg.norm(X[:, None] - C, axis=-1), axis=-1)
+    return (C, clss)
